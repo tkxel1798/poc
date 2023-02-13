@@ -38,8 +38,9 @@ export class AppComponent implements OnInit {
     if (decrypted) {
       formValues = JSON.parse(JSON.parse(decrypted));
     }
+    console.log(' ==== ', formValues);
     this.form = this.formBuilder.group({
-      url: ['', Validators.required],
+      url: [formValues ? formValues.url : '', Validators.required],
       username: [formValues ? formValues.username : '', [Validators.required]],
       password: [formValues ? formValues.password : '', [Validators.required]],
     });
