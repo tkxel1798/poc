@@ -25,21 +25,25 @@ export class AppComponent implements OnInit {
     let values = localStorage.getItem('values');
     let _key = CryptoJS.enc.Utf8.parse(environment.key);
     let _iv = CryptoJS.enc.Utf8.parse(environment.key);
-
-    let decrypted = CryptoJS.AES.decrypt(values, _key, {
-      keySize: 16,
-      iv: _iv,
-      mode: CryptoJS.mode.ECB,
-      padding: CryptoJS.pad.Pkcs7,
-    }).toString(CryptoJS.enc.Utf8);
-    let formValues = JSON.parse(JSON.parse(decrypted));
+    let decrypted = null;
+    let formValues = null;
+    if (values) {
+      decrypted = CryptoJS.AES.decrypt(values, _key, {
+        keySize: 16,
+        iv: _iv,
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7,
+      }).toString(CryptoJS.enc.Utf8);
+    }
+    if (decrypted) {
+      formValues = JSON.parse(JSON.parse(decrypted));
+    }
     this.form = this.formBuilder.group({
-      url: [formValues ? formValues.url : '', Validators.required],
+      url: ['', Validators.required],
       username: [formValues ? formValues.username : '', [Validators.required]],
       password: [formValues ? formValues.password : '', [Validators.required]],
     });
   }
-
   get f(): { [key: string]: AbstractControl } {
     return this.form.controls;
   }
@@ -52,8 +56,13 @@ export class AppComponent implements OnInit {
     }
 
     console.log(JSON.stringify(this.form.value, null, 2));
+    console.log(
+      `${this.form.value.url}/login?hash=${Md5.hashStr(
+        `${this.form.value.username}:${this.form.value.password}`
+      )}`
+    );
     window.open(
-      `http://localhost:4200/login?hash=${Md5.hashStr(
+      `${this.form.value.url}/login?hash=${Md5.hashStr(
         `${this.form.value.username}:${this.form.value.password}`
       )}`,
       '_blank'
